@@ -21,4 +21,3 @@ def pySum2():
     return c
 
 print(pySum2())
-
