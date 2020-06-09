@@ -41,32 +41,66 @@ class Maintenance:
         print(s.getvalue().decode())
         
     def login(self):
-        num = int(input("select ssh server number:"))
-        threshold = len(self.__hosts) + 1
-        if num > 0:
-            if num < threshold:
-                self.sshpass(self.__hosts[num - 1])
-            elif num == threshold:
-                userinfo = input("please input ssh server infomation: ")
-                pwd = getpass.getpass("password: ")
-                self.__hosts.append([userinfo,pwd])
-                self.save_userinfo()
-                print("num (%d)" %(num))
-                print(self.__hosts)
-                self.sshpass(self.__hosts[num - 1])
+        try:
+            num = int(input("select ssh server number:"))
+            threshold = len(self.__hosts) + 1
+            if num > 0:
+                if num < threshold:
+                    self.sshpass(self.__hosts[num - 1])
+                elif num == threshold:
+                    userinfo = input("please input ssh server infomation: ")
+                    pwd = getpass.getpass("password: ")
+                    self.__hosts.append([userinfo,pwd])
+                    self.save_userinfo()
+                    self.sshpass(self.__hosts[num - 1])
+                else:
+                    print("invalid number.")
+            elif num < 0:
+                abs_value = abs(num)
+                if abs_value < threshold:
+                    print("delete ssh server infomation: \n\t"
+                          + str(abs_value) +") " + str(self.__hosts[abs_value-1][0]))
+                    del self.__hosts[abs_value - 1]
+                    self.save_userinfo()
+                else:
+                    print("invalid number.")
             else:
-                print("invalid number.")
-        elif num < 0:
-            abs_value = abs(num)
-            if abs_value < threshold:
-                print("delete ssh server infomation: \n\t"
-                      + str(abs_value) +") " + str(self.__hosts[abs_value-1][0]))
-                del self.__hosts[abs_value - 1]
-                self.save_userinfo()
+                 print("invalid number.");
+        except ValueError as e:
+            print("ValueError: \n\t"
+                  + e.args)
+
+    def rz(self,src,des):
+        try:
+            num = int(input("select ssh server number:"))
+            print(self.__hosts[num - 1][0] + ":" + src)
+            print(des)
+            threshold = len(self.__hosts) + 1
+            if num > 0:
+                if num < threshold:
+                    os.execlp("sshpass","sshpass","-p",self.__hosts[num - 1][1],"scp","-r",self.__hosts[num - 1][0] + ":" + src,des)
+                else:
+                    print("invalid number.");
             else:
-                print("invalid number.")
-        else:
-            print("invalid number.");
+                print("invalid number.");
+        except ValueError as e:
+            print("ValueError: \n\t"
+                  + e.args)
+
+    def sz(self,src,des):
+        try:
+            num = int(input("select ssh server number:"))
+            threshold = len(self.__hosts) + 1
+            if num > 0:
+                if num < threshold:
+                    os.execlp("sshpass","sshpass","-p",self.__hosts[num - 1][1],"scp","-r",src,self.__hosts[num - 1][0] +":" + des)
+                else:
+                    print("invalid number.");
+            else:
+                print("invalid number.");
+        except ValueError as e:
+            print("ValueError: \n\t"
+                  + e.args)
 
     def update_userinfo(self):
         num = int(input("update ssh server infomation: "))
@@ -84,12 +118,14 @@ class Maintenance:
 maintenance [-luh]
 \t-l,--login\tlogin ssh server
 \t-u,--update\tupdate ssh server information
+\t-s,--send\tsends file
+\t-r,--receive\treceives file
 \t-h,--help\tusage
 ''')
 
     def getopt(self):
         try:
-            opts,args = getopt.getopt(sys.argv[1:],"luh",["login","update","help"])
+            opts,args = getopt.getopt(sys.argv[1:],"luhsr",["login","update","help","send","receive"])
             for opt , arg in opts:
                 if opt in ('-h','--help'):
                     self.usage();
@@ -99,6 +135,14 @@ maintenance [-luh]
                 elif opt in ('-l','--login'):
                     self.list_userinfo()
                     self.login()
+                elif opt in ('-s','--send'):
+                    self.list_userinfo()
+                    self.sz(sys.argv[2],sys.argv[3])
+                elif opt in ('r','--receive'):
+                    self.list_userinfo()
+                    self.rz(sys.argv[2],sys.argv[3])
+                else:
+                    self.usage()
         except getopt.GetoptError as e:
             print("GetoptError \n\t" +
                   e.args)
