@@ -11,7 +11,7 @@ class Maintenance:
         self.__hosts = []
 
     def sshpass(self,argv):
-        os.execlp("sshpass","sshpass","-p",argv[1],"ssh",argv[0])
+        os.execlp("sshpass","sshpass","-p",argv[1],"ssh","-o StrictHostKeyChecking=no",argv[0])
 
     def save_userinfo(self):
         with open(self.__user_dat,"wb") as f:
@@ -78,7 +78,7 @@ class Maintenance:
             threshold = len(self.__hosts) + 1
             if num > 0:
                 if num < threshold:
-                    os.execlp("sshpass","sshpass","-p",self.__hosts[num - 1][1],"scp","-r",self.__hosts[num - 1][0] + ":" + src,des)
+                    os.execlp("sshpass","sshpass","-p",self.__hosts[num - 1][1],"scp","-o StrictHostKeyChecking=no","-r",self.__hosts[num - 1][0] + ":" + src,des)
                 else:
                     print("invalid number.");
             else:
@@ -93,7 +93,7 @@ class Maintenance:
             threshold = len(self.__hosts) + 1
             if num > 0:
                 if num < threshold:
-                    os.execlp("sshpass","sshpass","-p",self.__hosts[num - 1][1],"scp","-r",src,self.__hosts[num - 1][0] +":" + des)
+                    os.execlp("sshpass","sshpass","-p","-o StrictHostKeyChecking=no",self.__hosts[num - 1][1],"scp","-r","-o StrictHostKeyChecking=no",src,self.__hosts[num - 1][0] +":" + des)
                 else:
                     print("invalid number.");
             else:
